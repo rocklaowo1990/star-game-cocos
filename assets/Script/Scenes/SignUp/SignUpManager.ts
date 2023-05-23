@@ -1,7 +1,7 @@
 import { _decorator, Button, Component, director, EditBox, Node } from 'cc'
-import { netModule } from '../../Common/NetModule'
 import { webSocketClient } from '../../Global/WebSocketClient'
-import { receive } from '../../Global/Receive'
+import { userApi } from '../../Api/UserApi'
+import { ResponseData } from '../../Common/HttpModule'
 const { ccclass, property } = _decorator
 
 @ccclass('SignUpManager')
@@ -21,30 +21,21 @@ export class SignUpManager extends Component {
     @property(Node)
     private loading: Node
 
-    private port: number = 3000
+    private response: XMLHttpRequest
+
 
     start() {
-        netModule.init(this.port, this.con)
+
     }
 
     update(deltaTime: number) {
         this.onTextChanged()
     }
 
-    private con(data: string) {
-        let _data = receive.from(data)
-
-        setTimeout(() => {
-            webSocketClient.hideLoading()
-            if (_data.code === 200) {
-                director.loadScene('SignInScene')
-                setTimeout(() => {
-                    webSocketClient.showPop('注册成功')
-                }, 500)
-            } else {
-                webSocketClient.showPop(_data.message)
-            }
-        }, 1000)
+    onDestroy(): void {
+        if (this.response != undefined) {
+            this.response.abort()
+        }
     }
 
 
@@ -62,6 +53,26 @@ export class SignUpManager extends Component {
         } else {
             this.signUpButton.getComponent(Button).interactable = true
         }
+    }
+
+    private signUpCallback(r: ResponseData) {
+        let timerHideLoading = setTimeout(() => {
+            webSocketClient.hideLoading()
+            if (r.status != -1) {
+                if (r.data.code == 200) {
+                    director.loadScene('SignInScene')
+                    let timerHomeScene = setTimeout(() => {
+                        webSocketClient.showPop(r.data.message)
+                        clearTimeout(timerHomeScene)
+                        timerHomeScene = null
+                    }, 500)
+                } else {
+                    webSocketClient.showPop(r.data.message)
+                }
+            }
+            clearTimeout(timerHideLoading)
+            timerHideLoading = null
+        }, 1000)
     }
 
     /**
@@ -82,12 +93,11 @@ export class SignUpManager extends Component {
 
         this.loading.active = true
 
-        let data = {
+        this.response = userApi.signup({
             account: account,
-            password: password
-        }
-
-        netModule.send(this.port, 'signUp', data)
+            password: password,
+            callBack: this.signUpCallback,
+        })
     }
 }
 

@@ -1,8 +1,8 @@
 import { _decorator, Button, Component, director, EditBox, Node } from 'cc'
-import { netModule } from '../../Common/NetModule'
-import { userInfo } from '../../Global/UserInfo'
+import { userApi } from '../../Api/UserApi'
+import { ResponseData } from '../../Common/HttpModule'
 import { webSocketClient } from '../../Global/WebSocketClient'
-import { receive } from '../../Global/Receive'
+
 const { ccclass, property } = _decorator
 
 @ccclass('SignInManager')
@@ -22,38 +22,23 @@ export class SignInManager extends Component {
     @property(Node)
     private loading: Node
 
-    private port: number = 3000
-
+    private response: XMLHttpRequest
 
     start() {
-        netModule.init(this.port, this.con)
+
     }
 
     update(deltaTime: number) {
         this.onTextChanged()
     }
 
-    private con(data: string) {
-        let _data = receive.from(data)
-
-        setTimeout(() => {
-            webSocketClient.hideLoading()
-            if (_data.code === 200) {
-                userInfo.roomId = _data.data.roomId
-                userInfo.avatarUrl = _data.data.avatarUrl
-                userInfo.uid = _data.data.uid
-                userInfo.nickName = _data.data.nickName
-                userInfo.roomCards = _data.data.roomCards
-
-                director.loadScene('HomeScene')
-                setTimeout(() => {
-                    webSocketClient.showPop('欢迎回来 ' + _data.data.nickName)
-                }, 500)
-            } else {
-                webSocketClient.showPop(_data.message)
-            }
-        }, 1000)
+    onDestroy(): void {
+        if (this.response != undefined) {
+            this.response.abort()
+        }
     }
+
+
 
     /**
     * @text
@@ -63,16 +48,37 @@ export class SignInManager extends Component {
     */
     private onSignIn() {
         this.loading.active = true
-
         let account = this.accountInput.getComponent(EditBox).string
         let password = this.passwordInput.getComponent(EditBox).string
 
-        let data = {
-            account: account,
-            password: password
-        }
 
-        netModule.send(this.port, 'signIn', data)
+
+
+        this.response = userApi.signin({
+            account: account,
+            password: password,
+            callBack: this.signInCallback,
+        })
+    }
+
+    private signInCallback(r: ResponseData) {
+        let timerHideLoading = setTimeout(() => {
+            webSocketClient.hideLoading()
+            if (r.status != -1) {
+                if (r.data.code == 200) {
+                    director.loadScene('HomeScene')
+                    let timerHomeScene = setTimeout(() => {
+                        webSocketClient.showPop(r.data.message)
+                        clearTimeout(timerHomeScene)
+                        timerHomeScene = null
+                    }, 500)
+                } else {
+                    webSocketClient.showPop(r.data.message)
+                }
+            }
+            clearTimeout(timerHideLoading)
+            timerHideLoading = null
+        }, 1000)
     }
 
     private onSignUp() {

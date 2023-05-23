@@ -1,5 +1,5 @@
 
-import { _decorator, Component, Label, log, Node, RichText, Sprite, SpriteFrame } from 'cc';
+import { _decorator, Component, director, Label, log, Node, RichText, Sprite, SpriteFrame } from 'cc';
 import { utils } from '../../Common/Utils';
 import { Box } from './Box';
 const { ccclass, property } = _decorator;
@@ -71,6 +71,8 @@ export class Tetris extends Component {
         this.setData()
         this.renewNode(this.gameData, this.gameNode)
         this.renewNode(this.nextBox.data, this.nextNode)
+        this.scoreNumber = 0
+        this.isDisabled = true
     }
 
     private isGameOveer() {
@@ -199,15 +201,17 @@ export class Tetris extends Component {
             if (i <= 0) {
                 clearInterval(gameTimer)
                 gameTimer = null
-                this.isDisabled = false
             } else {
                 i--
-                this.isDisabled = true
             }
         }.bind(this), 50)
     }
 
     private landing() {
+        clearInterval(this.downTimer)
+        this.downTimer = null
+        this.isDisabled = true
+
         for (let y = 0; y < this.currBox.data.length; y++) {
             for (let x = 0; x < this.currBox.data[y].length; x++) {
                 if (this.isValidPoint(this.currBox.origin, x, y) && this.gameData[y + this.currBox.origin.y][x + this.currBox.origin.x] === 1) {
@@ -216,38 +220,47 @@ export class Tetris extends Component {
             }
         }
 
+        this.renewNode(this.gameData, this.gameNode)
+        this.renewNode(this.nextBox.data, this.nextNode)
+
         if (this.isGameOveer()) {
             clearInterval(this.gameTimer)
-            clearInterval(this.downTimer)
             this.gameTimer = null
-            this.downTimer = null
             this.gameOverAnimation(this.gameData, this.gameNode)
             this.gameOverAnimation(this.nextBox.data, this.nextNode)
         } else {
             this.remove()
-            this.currBox = this.nextBox
-            this.nextBox = new Box()
-            this.setData()
+            let wait = setTimeout(() => {
+                this.currBox = this.nextBox
+                this.nextBox = new Box()
+                this.setData()
+                this.isDisabled = false
+                this.renewNode(this.gameData, this.gameNode)
+                this.renewNode(this.nextBox.data, this.nextNode)
+                this.downTimer = setInterval(this.down.bind(this), this.downTime)
+                clearTimeout(wait)
+                wait = null
+            }, 500)
         }
-
-        this.renewNode(this.gameData, this.gameNode)
-        this.renewNode(this.nextBox.data, this.nextNode)
     }
 
     private remove() {
         let y = this.gameData.length - 1
         let count = 0
 
-        while (y > this.currBox.origin.y) {
+        while (y >= this.currBox.origin.y) {
             let isCanRemove = true
             for (let x = 0; x < this.gameData[y].length; x++) {
                 if (this.gameData[y][x] !== 2) {
                     isCanRemove = false
                 }
             }
+            let newData: number[] = []
+            for (let i = 0; i < this.gameData[0].length; i++) {
+                newData.push(0)
+            }
             if (isCanRemove) {
                 count++
-                let newData: number[] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
                 this.gameData.splice(y, 1)
                 this.gameData.splice(0, 0, newData)
             } else {
@@ -268,31 +281,28 @@ export class Tetris extends Component {
         this.scoreNode.getComponent(RichText).string = utils.setRichText(this.scoreNumber.toString(), '00ff00')
         let newLeave = '1'
 
-        if (this.scoreNumber >= 3200) {
+        if (this.scoreNumber >= 320000) {
             newLeave = '7'
             this.downTime = 20
-        } else if (this.scoreNumber >= 1600) {
+        } else if (this.scoreNumber >= 160000) {
             newLeave = '6'
             this.downTime = 50
-        } else if (this.scoreNumber >= 800) {
+        } else if (this.scoreNumber >= 80000) {
             newLeave = '5'
             this.downTime = 100
-        } else if (this.scoreNumber >= 400) {
+        } else if (this.scoreNumber >= 40000) {
             newLeave = '4'
             this.downTime = 200
-        } else if (this.scoreNumber >= 200) {
+        } else if (this.scoreNumber >= 20000) {
             newLeave = '3'
             this.downTime = 500
-        } else if (this.scoreNumber >= 100) {
+        } else if (this.scoreNumber >= 10000) {
             newLeave = '2'
             this.downTime = 1000
         }
 
         if (newLeave !== this.leaveNode.getComponent(Label).string) {
             this.leaveNode.getComponent(Label).string = newLeave
-            clearInterval(this.downTimer)
-            this.downTimer = null
-            this.downTimer = setInterval(this.down.bind(this), this.downTime)
         }
     }
 
@@ -342,21 +352,24 @@ export class Tetris extends Component {
     }
 
     private onStart() {
-        if (this.buttonStartLabel.getComponent(Label).string === '开始' && this.downTimer === null) {
+
+        if (this.isDisabled) {
             this.gameTimer = setInterval(this.startGameTimer.bind(this), 1000)
             this.downTimer = setInterval(this.down.bind(this), this.downTime)
             this.buttonStartLabel.getComponent(Label).string = '暂停'
-        } else if (this.buttonStartLabel.getComponent(Label).string === '暂停' && this.downTimer !== null) {
+        } else {
             clearInterval(this.gameTimer)
             clearInterval(this.downTimer)
             this.gameTimer = null
             this.downTimer = null
             this.buttonStartLabel.getComponent(Label).string = '开始'
         }
+        this.isDisabled = !this.isDisabled
+
     }
 
     private onDownFast() {
-        if (!this.isGameOveer() && this.buttonStartLabel.getComponent(Label).string === '暂停') {
+        if (!this.isGameOveer() && this.buttonStartLabel.getComponent(Label).string === '暂停' && !this.isDisabled) {
             for (let y = this.currBox.origin.y; y < this.gameData.length; y++) {
                 let moveData = this.currBox.getDownData()
                 if (this.isCanMoveData(moveData.data, moveData.origin)) {
@@ -376,36 +389,41 @@ export class Tetris extends Component {
     }
 
     private onDownSlow() {
-        if (!this.isGameOveer() && this.buttonStartLabel.getComponent(Label).string === '暂停' && !this.isDisabled) {
+        if (!this.isDisabled) {
             this.down()
         }
     }
 
     private onReset() {
-        if (!this.isDisabled) {
-            this.initData()
-            this.gameTimer = setInterval(this.startGameTimer.bind(this), 1000)
-            this.downTimer = setInterval(this.down.bind(this), this.downTime)
-            this.buttonStartLabel.getComponent(Label).string = '暂停'
-        }
+        this.initData()
+        this.gameTimer = setInterval(this.startGameTimer.bind(this), 1000)
+        this.downTimer = setInterval(this.down.bind(this), this.downTime)
+        this.buttonStartLabel.getComponent(Label).string = '暂停'
+        this.isDisabled = false
+
     }
 
     private onLeft() {
-        if (!this.isGameOveer() && this.buttonStartLabel.getComponent(Label).string === '暂停' && !this.isDisabled) {
+        if (!this.isDisabled) {
             this.left()
         }
     }
 
     private onRight() {
-        if (!this.isGameOveer() && this.buttonStartLabel.getComponent(Label).string === '暂停' && !this.isDisabled) {
+        if (!this.isDisabled) {
             this.right()
         }
     }
 
     private onRotation() {
-        if (!this.isGameOveer() && this.buttonStartLabel.getComponent(Label).string === '暂停' && !this.isDisabled) {
+        if (!this.isDisabled) {
             this.rotation()
         }
+    }
+
+    private onBack() {
+        if (!this.isDisabled) this.initData()
+        director.loadScene("HomeScene")
     }
 
 }

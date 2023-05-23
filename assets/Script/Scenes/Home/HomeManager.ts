@@ -1,4 +1,4 @@
-import { _decorator, Component, Label, Node } from 'cc'
+import { _decorator, Component, director, Label, Node } from 'cc'
 import { userInfo } from '../../Global/UserInfo'
 const { ccclass, property } = _decorator
 
@@ -34,6 +34,12 @@ export class HomeManager extends Component {
         this.joinRoom.active = !this.createRoom.active
 
     }
+
+    private onTeris() {
+        director.loadScene("Tetris")
+    }
+
+
 
 }
 
