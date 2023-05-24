@@ -3,8 +3,8 @@ import { netModule } from '../../Common/NetModule';
 import { webSocketClient } from '../../Global/WebSocketClient';
 import { userInfo } from '../../Global/UserInfo';
 import Receive, { receive } from '../../Global/Receive';
-import { RoomData } from '../../Data/RoomData';
-import { PlayerData } from '../../Data/PlayerData';
+import { Room } from '../../Interface/Room';
+import { Player } from '../../Interface/Player';
 const { ccclass, property } = _decorator;
 
 @ccclass('PSZManager')
@@ -46,14 +46,14 @@ export class PSZManager extends Component {
         setTimeout(() => {
             this.loadingBox.active = false
             if (data.code === 200) {
-                let roomData = new RoomData().from(data.data)
+                let roomData = new Room().parse(data.data)
                 this.renewRoomInfo(roomData)
             }
             webSocketClient.showPop(data.message)
         }, 1000)
     }
 
-    private renewSeat(players: PlayerData[]) {
+    private renewSeat(players: Player[]) {
         let uid = userInfo.uid
         let _players = [...players]
 
@@ -69,23 +69,20 @@ export class PSZManager extends Component {
     }
 
 
-    private renewRoomInfo(roomData: RoomData) {
+    private renewRoomInfo(roomData: Room) {
         this.roomIdLabel.string = '房间: ' + roomData.roomId
         this.currentRoundLabel.string = '局数: ' + roomData.current + ' / ' + roomData.round
 
-        let players: PlayerData[] = this.renewSeat(roomData.players)
+        let players: Player[] = this.renewSeat(roomData.players)
 
         for (let i = 0; i < players.length; i++) {
             let playerNodeName: string = 'Player' + i
-            console.log(playerNodeName)
-            console.log(this)
-            console.log(this.node)
-            console.log(this.node.children[0])
+
             let player = this.node.getChildByName(playerNodeName)
-            console.log(player)
+
             player.getChildByName('NickNameLabel').getComponent(Label).string = players[i].nickName
             player.getChildByName('FractionLabel').getComponent(Label).string = '得分: ' + players[i].fraction
-            player.getChildByName('Avatar').active = players[i].avatarUrl === '' ? false : true
+            player.getChildByName('Avatar').active = players[i].avatar === '' ? false : true
             player.getChildByName('Poker').getChildByName('Folded').active = players[i].isFolded ? true : false
 
 
@@ -112,13 +109,17 @@ export class PSZManager extends Component {
             let data = {
                 uid: userInfo.uid,
                 roomId: userInfo.roomId,
-                avatarUrl: userInfo.avatarUrl,
+                avatarUrl: userInfo.avatar,
                 nickName: userInfo.nickName,
-                roomCards: userInfo.roomCards,
+                roomCards: userInfo.gold,
             }
 
-            netModule.send(this.port, 'enterRoom', data)
+            netModule.send('pin_san_zhang', 'enterRoom', data)
         }, 500)
+    }
+
+    protected onDestroy(): void {
+        netModule.close()
     }
 }
 

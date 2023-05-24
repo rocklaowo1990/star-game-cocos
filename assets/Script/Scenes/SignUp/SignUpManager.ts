@@ -2,6 +2,7 @@ import { _decorator, Button, Component, director, EditBox, Node } from 'cc'
 import { webSocketClient } from '../../Global/WebSocketClient'
 import { userApi } from '../../Api/UserApi'
 import { ResponseData } from '../../Common/HttpModule'
+import { utils } from '../../Common/Utils'
 const { ccclass, property } = _decorator
 
 @ccclass('SignUpManager')
@@ -14,6 +15,9 @@ export class SignUpManager extends Component {
 
     @property(Node)
     private passwordInputRe: Node
+
+    @property(Node)
+    private invitationInput: Node
 
     @property(Button)
     private signUpButton: Node
@@ -85,6 +89,7 @@ export class SignUpManager extends Component {
         let account = this.accountInput.getComponent(EditBox).string
         let password = this.passwordInput.getComponent(EditBox).string
         let passwordRe = this.passwordInputRe.getComponent(EditBox).string
+        let invitationCode = this.invitationInput.getComponent(EditBox).string
 
         if (password !== passwordRe) {
             webSocketClient.showPop('两次输入的密码不一致')
@@ -95,7 +100,8 @@ export class SignUpManager extends Component {
 
         this.response = userApi.signup({
             account: account,
-            password: password,
+            password: utils.encrypt(password),
+            invitationCode: invitationCode,
             callBack: this.signUpCallback,
         })
     }

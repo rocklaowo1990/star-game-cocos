@@ -1,6 +1,6 @@
-import { PlayerData } from './PlayerData'
+import { Player } from './Player'
 
-export class RoomData {
+export class Room {
     public roomId: number
     public createUid: number
     public current: number
@@ -8,11 +8,11 @@ export class RoomData {
     public round: number
     public gameName: string
     public gameState: string
-    public players: PlayerData[]
+    public players: Player[]
 
-    public from(data: any) {
+    public parse(data: any) {
 
-        let roomData = new RoomData()
+        let roomData = new Room()
 
         roomData.roomId = data.roomId
         roomData.createUid = data.createUid
@@ -25,7 +25,7 @@ export class RoomData {
 
         if (data.players !== undefined) {
             for (let i = 0; i < data.players.length; i++) {
-                let playerData = new PlayerData().from(data.players[i])
+                let playerData = new Player().parse(data.players[i])
                 roomData.players.push(playerData)
             }
         }

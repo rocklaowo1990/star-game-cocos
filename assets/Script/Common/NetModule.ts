@@ -19,9 +19,11 @@ class NetModule {
     }
 
     public init(port: number, onmessageCallback: Function) {
-        this.ws = new WebSocket(`ws://localhost:${port}`)
+        this.ws = new WebSocket(`ws://localhost:${port}/ws`)
 
         this.ws.onmessage = (event: MessageEvent) => {
+            console.log(event);
+
             onmessageCallback(event.data)
         }
 
@@ -47,12 +49,18 @@ class NetModule {
         }
     }
 
-    public send(port: number, type: string, data: any) {
+    public close() {
+        this.ws.close()
+    }
+
+    public send(game: string, type: string, data: any) {
         let message = {
-            port: port,
+            game: game,
             type: type,
             data: data
         }
+        console.log('=> 给服务器发送的是', JSON.stringify(message));
+
         this.ws.send(JSON.stringify(message))
     }
 }

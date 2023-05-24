@@ -7,40 +7,19 @@ const { ccclass, property } = _decorator
 
 @ccclass('CreatRoomManager')
 export class CreatRoomManager extends Component {
-    private port: number = 3002
     public isAllDrop: boolean = true
     public round: number = 10
 
 
     start() {
-        netModule.init(this.port, this.con)
     }
 
     update(deltaTime: number) {
 
     }
 
-    private con(data: string) {
-        let _data = receive.from(data)
-
-        setTimeout(() => {
-            webSocketClient.hideLoading()
-            if (_data.code === 200) {
-                userInfo.roomId = _data.data.roomId
-                director.loadScene('PinSanZhang')
-                setTimeout(() => {
-                    webSocketClient.showPop(_data.message)
-                }, 500)
-            } else {
-                webSocketClient.showPop(_data.message)
-            }
-        }, 1000)
-    }
-
     private onCreateRoom() {
         webSocketClient.showLoading()
-
-
 
         let round = this.round
         let isAllDrop = this.isAllDrop
@@ -52,7 +31,8 @@ export class CreatRoomManager extends Component {
             gameName: 'pinsanzhang'
         }
 
-        netModule.send(this.port, 'createRoom', data)
+        // netModule.send('pin_san_zhang', 'createRoom', data)
+        // 调用接口
     }
 
     private onChooseRoomsCount(event: EventTouch, data: string) {

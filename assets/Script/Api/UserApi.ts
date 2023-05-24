@@ -19,7 +19,7 @@ export class UserApi {
         account: string;
         password: string;
         callBack: Function;
-        invitationCcode?: string;
+        invitationCode?: string;
     }) {
         let url = '/user/signin'
         let params = 'account=' + data.account + '&password=' + data.password
@@ -31,11 +31,11 @@ export class UserApi {
         account: string;
         password: string;
         callBack: Function;
-        invitationCcode?: string;
+        invitationCode?: string;
     }) {
         let url = '/user/signup'
         let params = 'account=' + data.account + '&password=' + data.password
-        if (data.invitationCcode != undefined || data.invitationCcode != null || data.invitationCcode != '') params += '&invitationCcode=' + data.invitationCcode
+        if (data.invitationCode != '') params += '&invitationCode=' + data.invitationCode
         let response = httpModule.post(url, data.callBack, params)
         return response
     }

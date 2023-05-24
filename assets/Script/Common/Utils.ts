@@ -1,4 +1,5 @@
-
+import { config } from "../Global/Config"
+import { Md5 } from "./Md5"
 
 class Utils {
     private static _instance: Utils = null
@@ -12,6 +13,30 @@ class Utils {
         }
         return this._instance
     }
+
+    public encrypt(key: string) {
+        const salt = config.salt
+        // var encrypt = CryptoJS.AES.encrypt(key, CryptoJS.enc.Utf8.parse(aseKey), {
+        //     mode: CryptoJS.mode.ECB,
+        //     padding: CryptoJS.pad.Pkcs7
+        // }).toString();
+        // return encrypt
+
+        return Md5.hashStr(key + salt)
+    }
+
+    public decrypt(key: string) {
+        // const aseKey = config.salt
+
+        // //解密
+        // var decrypt = CryptoJS.AES.decrypt(key, CryptoJS.enc.Utf8.parse(aseKey), {
+        //     mode: CryptoJS.mode.ECB,
+        //     padding: CryptoJS.pad.Pkcs7
+        // }).toString(CryptoJS.enc.Utf8);
+        // return decrypt
+    }
+
+
 
     /**
      * 

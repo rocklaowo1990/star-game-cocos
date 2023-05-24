@@ -1,7 +1,9 @@
 import { _decorator, Button, Component, director, EditBox, Node } from 'cc'
 import { userApi } from '../../Api/UserApi'
-import { ResponseData } from '../../Common/HttpModule'
 import { webSocketClient } from '../../Global/WebSocketClient'
+import { ResponseData } from '../../Common/HttpModule';
+import { utils } from '../../Common/Utils';
+import { userInfo } from '../../Global/UserInfo';
 
 const { ccclass, property } = _decorator
 
@@ -22,7 +24,8 @@ export class SignInManager extends Component {
     @property(Node)
     private loading: Node
 
-    private response: XMLHttpRequest
+    private responseSignIn: XMLHttpRequest
+
 
     start() {
 
@@ -33,8 +36,8 @@ export class SignInManager extends Component {
     }
 
     onDestroy(): void {
-        if (this.response != undefined) {
-            this.response.abort()
+        if (this.responseSignIn != undefined) {
+            this.responseSignIn.abort()
         }
     }
 
@@ -52,11 +55,9 @@ export class SignInManager extends Component {
         let password = this.passwordInput.getComponent(EditBox).string
 
 
-
-
-        this.response = userApi.signin({
+        this.responseSignIn = userApi.signin({
             account: account,
-            password: password,
+            password: utils.encrypt(password),
             callBack: this.signInCallback,
         })
     }
@@ -66,6 +67,7 @@ export class SignInManager extends Component {
             webSocketClient.hideLoading()
             if (r.status != -1) {
                 if (r.data.code == 200) {
+                    userInfo.parse(r.data.data)
                     director.loadScene('HomeScene')
                     let timerHomeScene = setTimeout(() => {
                         webSocketClient.showPop(r.data.message)

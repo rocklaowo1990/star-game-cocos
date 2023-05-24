@@ -27,33 +27,12 @@ export class JoinRoomManager extends Component {
 
     private numberList: string[]
 
-    private port = 3002
     private roomId: number = undefined
 
     start() {
         this.numberList = []
         this.renewNumber()
-        netModule.init(this.port, this.con.bind(this))
 
-    }
-
-    private con(data: string) {
-        let _data = receive.from(data)
-
-        setTimeout(() => {
-            this.numberList = []
-            this.renewNumber()
-            webSocketClient.hideLoading()
-            if (_data.code === 200) {
-                userInfo.roomId = this.roomId
-                director.loadScene('PinSanZhang')
-                setTimeout(() => {
-                    webSocketClient.showPop(_data.message)
-                }, 500)
-            } else {
-                webSocketClient.showPop(_data.message)
-            }
-        }, 1000)
     }
 
     renewNumber() {
@@ -70,7 +49,8 @@ export class JoinRoomManager extends Component {
             let _data = {
                 roomId: this.roomId,
             }
-            netModule.send(this.port, 'joinRoom', _data)
+            // netModule.send('pin_san_zhang', 'joinRoom', _data)
+            // 调用接口
         }
     }
 
