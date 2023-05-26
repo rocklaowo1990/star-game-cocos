@@ -1,6 +1,7 @@
-import { httpModule } from "../Common/HttpModule"
+import { httpModule } from '../index'
 
-export class UserApi {
+
+export default class UserApi {
     private static _instance: UserApi = null
     constructor() {
 
@@ -16,10 +17,10 @@ export class UserApi {
 
 
     public signin(data: {
-        account: string;
-        password: string;
-        callBack: Function;
-        invitationCode?: string;
+        account: string
+        password: string
+        callBack: Function
+        invitationCode?: string
     }) {
         let url = '/user/signin'
         let params = 'account=' + data.account + '&password=' + data.password
@@ -28,10 +29,10 @@ export class UserApi {
     }
 
     public signup(data: {
-        account: string;
-        password: string;
-        callBack: Function;
-        invitationCode?: string;
+        account: string
+        password: string
+        callBack: Function
+        invitationCode?: string
     }) {
         let url = '/user/signup'
         let params = 'account=' + data.account + '&password=' + data.password
@@ -40,7 +41,5 @@ export class UserApi {
         return response
     }
 }
-
-export let userApi: UserApi = UserApi.getInstance()
 
 

@@ -1,7 +1,6 @@
-import { config } from "../Global/Config"
-import { Md5 } from "./Md5"
+import { Md5, config } from '../index'
 
-class Utils {
+export default class Utils {
     private static _instance: Utils = null
     constructor() {
 

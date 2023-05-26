@@ -1,4 +1,4 @@
-class Config {
+export default class Config {
     private static _instance: Config = null
     constructor() {
 
@@ -19,4 +19,4 @@ class Config {
     }
 }
 
-export let config = Config.getInstance()
+

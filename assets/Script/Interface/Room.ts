@@ -1,14 +1,15 @@
-import { Player } from './Player'
+import { Player, player } from '../index'
 
-export class Room {
-    public roomId: number
-    public createUid: number
+export default class Room {
+    public roomId: string
+    public createUid: string
     public current: number
     public isAllDrop: boolean
     public round: number
-    public gameName: string
+    public game: string
     public gameState: string
     public players: Player[]
+    public message: string
 
     public parse(data: any) {
 
@@ -19,14 +20,14 @@ export class Room {
         roomData.current = data.current
         roomData.isAllDrop = data.isAllDrop
         roomData.round = data.round
-        roomData.gameName = data.gameName
+        roomData.game = data.game
         roomData.gameState = data.gameState
         roomData.players = []
+        roomData.message = data.message
 
         if (data.players !== undefined) {
             for (let i = 0; i < data.players.length; i++) {
-                let playerData = new Player().parse(data.players[i])
-                roomData.players.push(playerData)
+                roomData.players.push(data.players[i])
             }
         }
 

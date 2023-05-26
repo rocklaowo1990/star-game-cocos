@@ -1,7 +1,6 @@
 import { Label, Animation, director } from "cc"
-import { userInfo } from "./UserInfo"
 
-class WebSocketClient {
+export default class WebSocketClient {
     private static _instance: WebSocketClient = null
     constructor() {
 
@@ -55,5 +54,3 @@ class WebSocketClient {
         }
     }
 }
-
-export let webSocketClient = WebSocketClient.getInstance()

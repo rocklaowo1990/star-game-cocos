@@ -1,4 +1,4 @@
-class UserInfo {
+export default class UserInfo {
     private static _instance: UserInfo = null
     constructor() {
 
@@ -22,9 +22,10 @@ class UserInfo {
     public email: string // 用户的邮箱
     public superiorID: string // 上级ID
     public creatIp: string // 注册时的IP地址
-    public roomId: number // 房间ID
+    public roomId: string // 房间ID
     public token: string // token
     public gold: number // 金币
+    public game: string // 当前游戏
 
     public parse(json: any) {
         this.uid = json.uid
@@ -41,8 +42,7 @@ class UserInfo {
         this.roomId = json.roomId
         this.token = json.token
         this.gold = json.gold
+        this.game = json.game
         return this
     }
 }
-
-export let userInfo = UserInfo.getInstance()

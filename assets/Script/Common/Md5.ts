@@ -1,11 +1,11 @@
 interface HasherState {
-    buffer: string;
-    buflen: number;
-    length: number;
-    state: number[];
-};
+    buffer: string
+    buflen: number
+    length: number
+    state: number[]
+}
 
-export class Md5 {
+export default class Md5 {
     private static _instance: Md5 = null
 
     static getInstance() {
@@ -20,13 +20,13 @@ export class Md5 {
      * @param str String to hash
      * @param raw Whether to return the value as an `Int32Array`
      */
-    public static hashStr(str: string, raw?: false): string;
-    public static hashStr(str: string, raw: true): Int32Array;
+    public static hashStr(str: string, raw?: false): string
+    public static hashStr(str: string, raw: true): Int32Array
     public static hashStr(str: string, raw: boolean = false) {
         return this.onePassHasher
             .start()
             .appendStr(str)
-            .end(raw);
+            .end(raw)
     }
 
     /**
@@ -34,30 +34,30 @@ export class Md5 {
      * @param str String to hash
      * @param raw Whether to return the value as an `Int32Array`
      */
-    public static hashAsciiStr(str: string, raw?: false): string;
-    public static hashAsciiStr(str: string, raw: true): Int32Array;
+    public static hashAsciiStr(str: string, raw?: false): string
+    public static hashAsciiStr(str: string, raw: true): Int32Array
     public static hashAsciiStr(str: string, raw: boolean = false) {
         return this.onePassHasher
             .start()
             .appendAsciiStr(str)
-            .end(raw);
+            .end(raw)
     }
     // Private Static Variables
     private static stateIdentity = new Int32Array([1732584193, -271733879, -1732584194, 271733878]);
     private static buffer32Identity = new Int32Array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
-    private static hexChars = '0123456789abcdef';
-    private static hexOut: string[] = [];
+    private static hexChars = '0123456789abcdef'
+    private static hexOut: string[] = []
 
     // Permanent instance is to use for one-call hashing
-    private static onePassHasher = new Md5();
+    private static onePassHasher = new Md5()
 
     private static _hex(x: Int32Array): string {
-        const hc = Md5.hexChars;
-        const ho = Md5.hexOut;
-        let n: number;
-        let offset: number;
-        let j: number;
-        let i: number;
+        const hc = Md5.hexChars
+        const ho = Md5.hexOut
+        let n: number
+        let offset: number
+        let j: number
+        let i: number
 
         for (i = 0; i < 4; i += 1) {
             offset = i * 8;
@@ -69,17 +69,17 @@ export class Md5 {
                 n >>>= 4;
             }
         }
-        return ho.join('');
+        return ho.join('')
     }
 
     private static _md5cycle(x: Int32Array | Uint32Array, k: Int32Array | Uint32Array) {
-        let a = x[0];
-        let b = x[1];
-        let c = x[2];
-        let d = x[3];
+        let a = x[0]
+        let b = x[1]
+        let c = x[2]
+        let d = x[3]
         // ff()
-        a += (b & c | ~b & d) + k[0] - 680876936 | 0;
-        a = (a << 7 | a >>> 25) + b | 0;
+        a += (b & c | ~b & d) + k[0] - 680876936 | 0
+        a = (a << 7 | a >>> 25) + b | 0
         d += (a & b | ~a & c) + k[1] - 389564586 | 0;
         d = (d << 12 | d >>> 20) + a | 0;
         c += (d & a | ~d & b) + k[2] + 606105819 | 0;
@@ -421,5 +421,3 @@ export class Md5 {
         return raw ? this._state : Md5._hex(this._state);
     }
 }
-
-export let md5: Md5 = Md5.getInstance()

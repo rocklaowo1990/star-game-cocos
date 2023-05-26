@@ -1,6 +1,7 @@
-import { httpModule } from "../Common/HttpModule"
+import { httpModule } from '../index'
 
-export class ConfigAPi {
+
+export default class ConfigAPi {
     private static _instance: ConfigAPi = null
     constructor() {
 
@@ -14,7 +15,7 @@ export class ConfigAPi {
     }
 
     public getConfig(callBack: Function) {
-        let url = '/config/getConfig'
+        let url = '/config/getconfig'
         let response = httpModule.get(url, callBack)
         return response
     }

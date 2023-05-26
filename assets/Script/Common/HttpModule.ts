@@ -1,4 +1,6 @@
-export class HttpModule {
+import { Response, receive } from '../index'
+
+export default class HttpModule {
     private xhr: XMLHttpRequest
     private baseUrl: string
     private timeout: number
@@ -27,13 +29,13 @@ export class HttpModule {
         this.xhr.open('GET', path, true)
         this.xhr.onreadystatechange = () => {
             if (this.xhr.readyState === 4 && this.xhr.status == 200) {
-                let respone: ResponseData = {
+                let respone: Response = {
                     status: this.xhr.status,
-                    data: new ReceiveData().parse(this.xhr.response)
+                    data: receive.parse(this.xhr.response)
                 }
                 callBack(respone)
             } else {
-                let respone: ResponseData = { status: -1, data: null }
+                let respone: Response = { status: -1, data: null }
                 callBack(respone)
             }
         }
@@ -47,20 +49,20 @@ export class HttpModule {
     public post(
         url: string,
         callBack: Function,
-        params: string,
+        params?: string,
     ) {
         var path = this.baseUrl + url
         if (params) path += '?' + params
         this.xhr.open('POST', path, true)
         this.xhr.onreadystatechange = () => {
             if (this.xhr.readyState === 4 && this.xhr.status == 200) {
-                let respone: ResponseData = {
+                let respone: Response = {
                     status: this.xhr.status,
-                    data: new ReceiveData().parse(this.xhr.response)
+                    data: receive.parse(this.xhr.response)
                 }
                 callBack(respone)
             } else {
-                let respone: ResponseData = { status: -1, data: null }
+                let respone: Response = { status: -1, data: null }
                 callBack(respone)
             }
         }
@@ -72,26 +74,5 @@ export class HttpModule {
     }
 }
 
-export let httpModule: HttpModule = HttpModule.getInstance()
-
-
-export type ResponseData = {
-    status: number,
-    data: ReceiveData,
-}
-
-class ReceiveData {
-    code: number
-    message: string
-    data: any
-
-    public parse(data: any) {
-        let _data = JSON.parse(data)
-        this.code = _data.code
-        this.message = _data.message
-        this.data = _data.data
-        return this
-    }
-}
 
 
