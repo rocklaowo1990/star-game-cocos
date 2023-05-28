@@ -1,5 +1,5 @@
 import { _decorator, Button, Component, director, EditBox, Node } from 'cc'
-import { webSocketClient, utils, Response, userApi } from '../../Script'
+import { common, utils, userApi, Receive } from '../../Script'
 const { ccclass, property } = _decorator
 
 @ccclass('SignUpManager')
@@ -56,23 +56,15 @@ export class SignUpManager extends Component {
         }
     }
 
-    private signUpCallback(r: Response) {
-        let timerHideLoading = setTimeout(() => {
-            webSocketClient.hideLoading()
-            if (r.status != -1) {
-                if (r.data.code == 200) {
-                    director.loadScene('SignInScene')
-                    let timerHomeScene = setTimeout(() => {
-                        webSocketClient.showPop(r.data.message)
-                        clearTimeout(timerHomeScene)
-                        timerHomeScene = null
-                    }, 500)
-                } else {
-                    webSocketClient.showPop(r.data.message)
-                }
+    private signUpCallback(r: Receive) {
+        setTimeout(() => {
+            common.hideLoading()
+            if (r.code == 200) {
+                director.loadScene('SignInScene')
+                setTimeout(() => common.showPop(r.message), 500)
+            } else {
+                common.showPop(r.message)
             }
-            clearTimeout(timerHideLoading)
-            timerHideLoading = null
         }, 1000)
     }
 
@@ -89,7 +81,7 @@ export class SignUpManager extends Component {
         let invitationCode = this.invitationInput.getComponent(EditBox).string
 
         if (password !== passwordRe) {
-            webSocketClient.showPop('两次输入的密码不一致')
+            common.showPop('两次输入的密码不一致')
             return
         }
 
@@ -99,7 +91,7 @@ export class SignUpManager extends Component {
             account: account,
             password: utils.encrypt(password),
             invitationCode: invitationCode,
-            callBack: this.signUpCallback,
+            callBack: this.signUpCallback.bind(this),
         })
     }
 }

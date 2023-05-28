@@ -1,5 +1,5 @@
-import { _decorator, Component, director, EventTouch } from 'cc'
-import { roomApi, userInfo, webSocketClient, Response } from '../../Script'
+import { _decorator, Component, director, EventTouch, Label, Node } from 'cc'
+import { roomApi, userInfo, common, Receive } from '../../Script'
 
 const { ccclass, property } = _decorator
 
@@ -7,7 +7,6 @@ const { ccclass, property } = _decorator
 export class CreatRoomManager extends Component {
     public isAllDrop: boolean = true
     public round: number = 10
-
 
     start() {
     }
@@ -17,8 +16,6 @@ export class CreatRoomManager extends Component {
     }
 
     private onCreateRoom() {
-        webSocketClient.showLoading()
-
         let round = this.round
         let isAllDrop = this.isAllDrop
 
@@ -33,24 +30,19 @@ export class CreatRoomManager extends Component {
         roomApi.createRoom(data)
     }
 
-    private creatRoomCallback(r: Response) {
-        let timerHideLoading = setTimeout(() => {
-            webSocketClient.hideLoading()
-            if (r.status != -1) {
-                if (r.data.code == 200) {
-                    director.loadScene('PinSanZhang')
-                    userInfo.roomId = r.data.data.roomId
-                    let timerHomeScene = setTimeout(() => {
-                        webSocketClient.showPop(r.data.message)
-                        clearTimeout(timerHomeScene)
-                        timerHomeScene = null
-                    }, 500)
-                } else {
-                    webSocketClient.showPop(r.data.message)
-                }
+    private creatRoomCallback(r: Receive) {
+
+        setTimeout(() => {
+            common.hideLoading()
+            if (r.code == 200) {
+                director.loadScene('PinSanZhang')
+                userInfo.roomId = r.data.roomId
+                setTimeout(() => {
+                    common.showPop(r.message)
+                }, 500)
+            } else {
+                common.showPop(r.message)
             }
-            clearTimeout(timerHideLoading)
-            timerHideLoading = null
         }, 1000)
     }
 

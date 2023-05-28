@@ -1,5 +1,5 @@
 import { director } from "cc"
-import { webSocketClient } from '../index'
+import { common } from '../index'
 
 export default class WSModule {
     private ws: WebSocket = null
@@ -17,7 +17,7 @@ export default class WSModule {
         return this._instance
     }
 
-    public init(port: number, onmessageCallback: Function) {
+    public init(port: number, onmessageCallback: Function, onopenCallback?: Function) {
         this.ws = new WebSocket(`ws://localhost:${port}/ws`)
 
         this.ws.onmessage = (event: MessageEvent) => {
@@ -27,7 +27,7 @@ export default class WSModule {
         this.ws.onclose = (event: Event) => {
             let scene = director.getScene()
             if (scene !== undefined) {
-                webSocketClient.showLoading()
+                common.showWsLoading()
                 if (this.isReconnect) {
                     this.isReconnect = false
                     setTimeout(() => {
@@ -42,8 +42,9 @@ export default class WSModule {
         }
 
         this.ws.onopen = (event: Event) => {
-            webSocketClient.hideLoading()
+            common.hideWsLoading()
             this.heartbeat()
+            onopenCallback(event)
         }
     }
 
@@ -58,7 +59,6 @@ export default class WSModule {
             type: type,
             data: data
         }
-        console.log('=> 给服务器发送的是', JSON.stringify(message));
         this.ws.send(JSON.stringify(message))
     }
 
@@ -67,8 +67,9 @@ export default class WSModule {
             type: "ping",
         }
 
-        let t = setInterval(() => {
-            console.log('==>')
+        setInterval(() => {
+            console.log('=>');
+
             this.ws.send(JSON.stringify(message))
         }, 1000 * 60)
 

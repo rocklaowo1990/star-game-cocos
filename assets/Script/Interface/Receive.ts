@@ -1,4 +1,4 @@
-export default class ReceiveData {
+export default class Receive {
     code: number
     message: string
     data: any

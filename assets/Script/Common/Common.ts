@@ -1,23 +1,19 @@
-import { Label, Animation, director } from "cc"
+import { Label, director, Animation } from "cc"
 
-export default class WebSocketClient {
-    private static _instance: WebSocketClient = null
+export default class Common {
+
+    private static _instance: Common = null
     constructor() {
 
     }
 
     static getInstance() {
         if (!this._instance) {
-            this._instance = new WebSocketClient()
+            this._instance = new Common()
         }
         return this._instance
     }
 
-    /**
-     * 
-     * @param message 顶部的弹窗消息
-     * @param 这里展示顶部弹窗的方法
-     */
     public showPop(message: string) {
         const scene = director.getScene()
 
@@ -28,11 +24,23 @@ export default class WebSocketClient {
         }
     }
 
-    /**
-     * 
-     * @param 这里展示Loading的方法
-     * 在请求网络的时候会先出现 Loading
-     */
+    public showWsLoading() {
+        const scene = director.getScene()
+
+        if (scene) {
+            let loading = scene.children[0].getChildByName('WsLoading')
+            if (!loading.active) loading.active = true
+        }
+    }
+
+    public hideWsLoading() {
+        const scene = director.getScene()
+        if (scene) {
+            let loading = scene.children[0].getChildByName('WsLoading')
+            if (loading.active) loading.active = false
+        }
+    }
+
     public showLoading() {
         const scene = director.getScene()
 
@@ -42,12 +50,8 @@ export default class WebSocketClient {
         }
     }
 
-    /**
-     * 关闭Loading
-     */
     public hideLoading() {
         const scene = director.getScene()
-
         if (scene) {
             let loading = scene.children[0].getChildByName('Loading')
             if (loading.active) loading.active = false

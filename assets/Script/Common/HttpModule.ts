@@ -1,4 +1,4 @@
-import { Response, receive } from '../index'
+import { receive } from '../index'
 
 export default class HttpModule {
     private xhr: XMLHttpRequest
@@ -28,15 +28,15 @@ export default class HttpModule {
         if (params) path += '?' + params
         this.xhr.open('GET', path, true)
         this.xhr.onreadystatechange = () => {
-            if (this.xhr.readyState === 4 && this.xhr.status == 200) {
-                let respone: Response = {
-                    status: this.xhr.status,
-                    data: receive.parse(this.xhr.response)
+            if (this.xhr.readyState === 4) {
+                if (this.xhr.status === 200) {
+                    callBack(receive.parse(this.xhr.response))
+                } else {
+                    let _receive = receive
+                    _receive.code = -1
+                    _receive.message = '服务器连接失败'
+                    callBack(_receive)
                 }
-                callBack(respone)
-            } else {
-                let respone: Response = { status: -1, data: null }
-                callBack(respone)
             }
         }
 
@@ -55,18 +55,17 @@ export default class HttpModule {
         if (params) path += '?' + params
         this.xhr.open('POST', path, true)
         this.xhr.onreadystatechange = () => {
-            if (this.xhr.readyState === 4 && this.xhr.status == 200) {
-                let respone: Response = {
-                    status: this.xhr.status,
-                    data: receive.parse(this.xhr.response)
+            if (this.xhr.readyState === 4) {
+                if (this.xhr.status === 200) {
+                    callBack(receive.parse(this.xhr.response))
+                } else {
+                    let _receive = receive
+                    _receive.code = -1
+                    _receive.message = '服务器连接失败'
+                    callBack(_receive)
                 }
-                callBack(respone)
-            } else {
-                let respone: Response = { status: -1, data: null }
-                callBack(respone)
             }
         }
-
         this.xhr.timeout = this.timeout
         this.xhr.send()
         // this.xhr.abort() 请求终止

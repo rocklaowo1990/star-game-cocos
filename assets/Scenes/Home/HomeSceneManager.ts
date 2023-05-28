@@ -1,5 +1,5 @@
 import { _decorator, Component, director, Label, Node } from 'cc'
-import { roomApi, userInfo, Response, webSocketClient } from '../../Script'
+import { roomApi, userInfo, common, Receive } from '../../Script'
 
 const { ccclass, property } = _decorator
 
@@ -42,7 +42,7 @@ export class HomeManager extends Component {
     }
 
     private checkInRoom() {
-        webSocketClient.showLoading()
+        common.showLoading()
         setTimeout(() => {
             roomApi.checkInRoom({
                 uid: userInfo.uid,
@@ -51,19 +51,19 @@ export class HomeManager extends Component {
         }, 500)
     }
 
-    private responseCallback(r: Response) {
-        setTimeout(function () {
-            webSocketClient.hideLoading()
-            if (r.status != -1) {
-                if (r.data.code == 200) {
-                    userInfo.roomId = r.data.data.roomId
-                    userInfo.game = r.data.data.game
-                    if (userInfo.game == 'pin_san_zhang') {
-                        director.loadScene('PinSanZhang')
-                    }
+    private responseCallback(r: Receive) {
+        setTimeout(() => {
+            common.hideLoading()
+            if (r.code == 200) {
+                userInfo.roomId = r.data.roomId
+                userInfo.game = r.data.game
+                if (userInfo.game == 'pin_san_zhang') {
+                    director.loadScene('PinSanZhang')
                 }
+            } else {
+                common.showPop(r.message)
             }
-        }.bind(this), 500)
+        }, 500)
     }
 }
 

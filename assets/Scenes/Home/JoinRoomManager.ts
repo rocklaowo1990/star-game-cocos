@@ -1,5 +1,5 @@
 import { _decorator, Component, director, EventTouch, Label, Node } from 'cc'
-import { roomApi, webSocketClient, Response, userInfo } from '../../Script'
+import { common, Receive, roomApi, userInfo } from '../../Script'
 
 const { ccclass, property } = _decorator
 
@@ -42,7 +42,7 @@ export class JoinRoomManager extends Component {
         this.Label6.string = (this.numberList.length > 5) ? this.numberList[5] : '-'
         if (this.numberList.length >= 6) {
             this.roomId = this.numberList.join('')
-            webSocketClient.showLoading()
+            common.showLoading()
 
             let data = {
                 roomId: this.roomId,
@@ -54,25 +54,23 @@ export class JoinRoomManager extends Component {
         }
     }
 
-    private joinRoomCallback(r: Response) {
-        let timerHideLoading = setTimeout(() => {
-            webSocketClient.hideLoading()
-            if (r.status != -1) {
-                if (r.data.code == 200) {
-                    userInfo.roomId = r.data.data.roomId
-                    director.loadScene('PinSanZhang')
-                    let timerHomeScene = setTimeout(() => {
-                        webSocketClient.showPop(r.data.message)
-                        clearTimeout(timerHomeScene)
-                        timerHomeScene = null
-                    }, 500)
-                } else {
-                    this.onClear()
-                    webSocketClient.showPop(r.data.message)
-                }
+    private joinRoomCallback(r: Receive) {
+        setTimeout(() => {
+            common.hideLoading()
+            if (r.code == 200) {
+                userInfo.roomId = r.data.roomId
+                director.loadScene('PinSanZhang')
+                let timerHomeScene = setTimeout(() => {
+                    common.showPop(r.message)
+                    clearTimeout(timerHomeScene)
+                    timerHomeScene = null
+                }, 500)
+            } else {
+                this.onClear()
+                common.showPop(r.message)
             }
-            clearTimeout(timerHideLoading)
-            timerHideLoading = null
+
+
         }, 1000)
     }
 

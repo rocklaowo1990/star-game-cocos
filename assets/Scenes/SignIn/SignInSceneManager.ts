@@ -1,5 +1,5 @@
 import { _decorator, Button, Component, director, EditBox, Node } from 'cc'
-import { userApi, userInfo, utils, webSocketClient, Response } from '../../Script'
+import { userApi, userInfo, utils, Receive, common } from '../../Script'
 
 
 
@@ -39,8 +39,6 @@ export class SignInManager extends Component {
         }
     }
 
-
-
     /**
     * @text
     * 登陆按钮点击事件
@@ -52,7 +50,6 @@ export class SignInManager extends Component {
         let account = this.accountInput.getComponent(EditBox).string
         let password = this.passwordInput.getComponent(EditBox).string
 
-
         this.responseSignIn = userApi.signin({
             account: account,
             password: utils.encrypt(password),
@@ -60,26 +57,19 @@ export class SignInManager extends Component {
         })
     }
 
-    private signInCallback(r: Response) {
-        let timerHideLoading = setTimeout(() => {
-            webSocketClient.hideLoading()
-            if (r.status != -1) {
-                if (r.data.code == 200) {
-                    userInfo.parse(r.data.data)
-                    director.loadScene('HomeScene')
-                    let timerHomeScene = setTimeout(() => {
-                        webSocketClient.showPop(r.data.message)
-                        clearTimeout(timerHomeScene)
-                        timerHomeScene = null
-                    }, 500)
-                } else {
-                    webSocketClient.showPop(r.data.message)
-                }
+    private signInCallback(r: Receive) {
+        setTimeout(() => {
+            common.hideLoading()
+            if (r.code == 200) {
+                userInfo.parse(r.data)
+                director.loadScene('HomeScene')
+                setTimeout(() => common.showPop(r.message), 500)
+            } else {
+                common.showPop(r.message)
             }
-            clearTimeout(timerHideLoading)
-            timerHideLoading = null
         }, 1000)
     }
+
 
     private onSignUp() {
         director.loadScene('SignUpScene')

@@ -60,6 +60,33 @@ export default class Utils {
         return number
 
     };
+
+    public getTime(time: number) {
+
+        let minutes = '0'
+        let seconds = '0'
+        let hours = '0'
+
+        if (time % 60 < 10) {
+            seconds = '0' + time % 60
+        } else {
+            seconds = time % 60 + ''
+        }
+
+        if (Math.floor(time / 60) % 60 < 10) {
+            minutes = '0' + Math.floor(time / 60)
+        } else {
+            minutes = Math.floor(time / 60) + ''
+        }
+
+        if (Math.floor(time / 3600) < 10) {
+            hours = '0' + Math.floor(time / 3600)
+        } else if (Math.floor(time / 60) < 60) {
+            hours = Math.floor(time / 3600) + ''
+        }
+
+        return hours + ':' + minutes + ':' + seconds
+    }
 }
 
 export let utils: Utils = Utils.getInstance()
